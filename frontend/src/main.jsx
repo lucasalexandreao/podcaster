@@ -5,10 +5,43 @@ import './style.css';
 function App() {
   return (
     <main className="app">
-      <section className="card">
-        <p className="eyebrow">React + Vite</p>
-        <h1>Basic React App</h1>
-        <p>Edit <code>src/main.jsx</code> and save to reload.</p>
+      <nav className="topbar" aria-label="Navegacao principal">
+        <strong>Podcaster</strong>
+        <span>Planejamento e Design</span>
+      </nav>
+
+      <section className="hero">
+        <div className="hero-content">
+          <p className="eyebrow">Podcasts gerados por IA</p>
+          <h1>Crie ideias para podcasts dinamicos com agentes artificiais.</h1>
+          <p className="intro">
+            Uma plataforma web para dirigir conversas entre agentes de IA,
+            moldando tema, personalidade e tom antes da geracao do episodio.
+          </p>
+          <div className="status-card">
+            <span>Status atual</span>
+            <strong>Prototipo inicial de interface</strong>
+          </div>
+        </div>
+
+        <aside className="preview-card" aria-label="Previa visual do produto">
+          <div className="preview-header">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div className="waveform" aria-hidden="true">
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+          </div>
+          <p>Estudio de criacao em breve</p>
+        </aside>
       </section>
     </main>
   );
