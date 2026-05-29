@@ -308,3 +308,332 @@ p {
     flex-direction: column;
   }
 }
+
+/* =========================================
+   ESTILOS DO DASHBOARD (ESTÚDIO)
+   ========================================= */
+
+.dashboard-app {
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 111, 97, 0.4);
+  color: #ff6f61;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 160ms ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 111, 97, 0.1);
+  border-color: #ff6f61;
+}
+
+.dashboard-content {
+  width: min(100%, 72rem);
+  margin: 3rem auto 0;
+  flex: 1;
+}
+
+.dashboard-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #ff6f61, #ffb86b);
+  border: none;
+  border-radius: 1rem;
+  padding: 0.8rem 1.5rem;
+  color: #130f22;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 160ms ease, filter 160ms ease;
+  box-shadow: 0 4px 15px rgba(255, 184, 107, 0.3);
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.project-card {
+  border: 1px solid rgba(255, 248, 238, 0.12);
+  border-radius: 1.5rem;
+  background: rgba(255, 248, 238, 0.03);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: transform 200ms ease, background 200ms ease;
+  backdrop-filter: blur(10px);
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 248, 238, 0.06);
+  border-color: rgba(255, 248, 238, 0.25);
+}
+
+.project-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.project-date {
+  font-size: 0.8rem;
+  color: rgba(255, 248, 238, 0.5);
+}
+
+.project-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.project-details {
+  font-size: 0.85rem;
+  color: rgba(255, 248, 238, 0.6);
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.play-btn {
+  background: rgba(255, 248, 238, 0.1);
+  border: 1px solid rgba(255, 248, 238, 0.1);
+  color: #fff8ee;
+  padding: 0.6rem;
+  border-radius: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease;
+  width: 100%;
+}
+
+.play-btn:hover {
+  background: rgba(255, 248, 238, 0.2);
+}
+
+.waveform-mini {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+}
+
+.waveform-mini i {
+  width: 4px;
+  background: linear-gradient(#ff6f61, #6f59ff);
+  border-radius: 999px;
+  animation: pulse 1s infinite alternate ease-in-out;
+}
+
+.waveform-mini i:nth-child(1) { height: 10px; animation-delay: 0.1s; }
+.waveform-mini i:nth-child(2) { height: 18px; animation-delay: 0.3s; }
+.waveform-mini i:nth-child(3) { height: 12px; animation-delay: 0.2s; }
+.waveform-mini i:nth-child(4) { height: 8px; animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0% { transform: scaleY(0.7); opacity: 0.7; }
+  100% { transform: scaleY(1); opacity: 1; }
+}
+
+@media (max-width: 760px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .primary-btn {
+    width: 100%;
+  }
+}
+
+/* =========================================
+   ESTILOS DA CONFIGURAÇÃO (NEW PODCAST)
+   ========================================= */
+
+.config-container {
+  width: min(100%, 64rem);
+  margin: 3rem auto;
+  padding-bottom: 5rem;
+}
+
+.config-header {
+  margin-bottom: 2rem;
+}
+
+.config-header h2 {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  margin: 0;
+}
+
+.config-form {
+  display: grid;
+  gap: 2.5rem;
+}
+
+.config-section h3 {
+  color: #ffb86b;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,248,238,0.1);
+  padding-bottom: 0.5rem;
+}
+
+.config-label {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.config-label span {
+  color: rgba(255, 248, 238, 0.72);
+  font-size: 0.9rem;
+}
+
+.config-label textarea,
+.config-label select {
+  width: 100%;
+  border: 1px solid rgba(255, 248, 238, 0.16);
+  border-radius: 1rem;
+  background: rgba(19, 15, 34, 0.55);
+  padding: 0.95rem 1rem;
+  color: #fff8ee;
+  font: inherit;
+  outline: none;
+  resize: vertical;
+}
+
+.config-label select {
+  cursor: pointer;
+  appearance: none; /* Remove seta padrão do navegador */
+}
+
+.config-label textarea:focus,
+.config-label select:focus {
+  border-color: #ffb86b;
+}
+
+/* Slider Customizado */
+.duration-slider {
+  width: 100%;
+  accent-color: #ff6f61;
+  cursor: pointer;
+}
+
+/* Grelha de Agentes */
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.agent-card {
+  border: 1px solid rgba(255, 248, 238, 0.12);
+  border-radius: 1.5rem;
+  background: rgba(255, 248, 238, 0.05);
+  padding: 1.5rem;
+}
+
+.agent-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.agent-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6f61, #ffb86b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #130f22;
+}
+
+.agent-avatar.agent2-color {
+  background: linear-gradient(135deg, #6f59ff, #00d2ff);
+  color: #fff;
+}
+
+/* Tags de Personalidade (Pílulas) */
+.traits-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.trait-pill {
+  background: transparent;
+  border: 1px solid rgba(255, 248, 238, 0.2);
+  color: rgba(255, 248, 238, 0.7);
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.trait-pill:hover {
+  border-color: rgba(255, 248, 238, 0.5);
+}
+
+.trait-pill.active {
+  background: rgba(255, 111, 97, 0.2);
+  border-color: #ff6f61;
+  color: #ffb86b;
+}
+
+/* Botão de Gerar Principal */
+.generate-btn {
+  background: linear-gradient(135deg, #6f59ff, #00d2ff);
+  border: none;
+  border-radius: 1rem;
+  padding: 1.2rem;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 160ms ease, filter 160ms ease;
+  box-shadow: 0 4px 20px rgba(111, 89, 255, 0.4);
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
