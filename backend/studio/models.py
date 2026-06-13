@@ -3,18 +3,20 @@ from django.db import models
 
 
 class PodcastProject(models.Model):
-    STATUS_DRAFT = 'draft'
+    STATUS_GENERATING = 'generating'
     STATUS_SCRIPT_READY = 'script_ready'
+    STATUS_FAILED = 'failed'
 
     STATUS_CHOICES = (
-        (STATUS_DRAFT, 'Draft'),
+        (STATUS_GENERATING, 'Generating'),
         (STATUS_SCRIPT_READY, 'Script ready'),
+        (STATUS_FAILED, 'Failed'),
     )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='podcast_projects')
     topic = models.TextField()
     target_duration = models.PositiveIntegerField(default=5)
-    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default=STATUS_SCRIPT_READY)
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default=STATUS_GENERATING)
     agent1_config = models.JSONField(default=dict)
     agent2_config = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)

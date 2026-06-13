@@ -704,6 +704,43 @@ p {
   font-size: 0.86rem;
 }
 
+.live-generation {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+  border: 1px solid rgba(0, 210, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(0, 210, 255, 0.08);
+  padding: 0.65rem 0.9rem;
+  color: rgba(255, 248, 238, 0.8);
+  font-size: 0.9rem;
+}
+
+.live-generation i {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  background: #00d2ff;
+  box-shadow: 0 0 0 rgba(0, 210, 255, 0.55);
+  animation: live-ping 1.4s infinite;
+}
+
+.live-empty-state {
+  width: min(100%, 34rem);
+  border: 1px dashed rgba(255, 248, 238, 0.2);
+  border-radius: 1.3rem;
+  background: rgba(255, 248, 238, 0.04);
+  padding: 1.25rem;
+  color: rgba(255, 248, 238, 0.68);
+}
+
+@keyframes live-ping {
+  0% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.55); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 210, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); }
+}
+
 .chat-script {
   display: grid;
   gap: 1.4rem;
