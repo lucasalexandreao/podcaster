@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from accounts.views import RegisterView, PasswordResetRequestView 
 
@@ -17,4 +17,7 @@ urlpatterns = [
 
     # Rota de resetar senha
     path('api/password-reset/', PasswordResetRequestView.as_view(), name='password_reset'),
+
+    # Rotas do estúdio
+    path('api/studio/', include('studio.urls')),
 ]

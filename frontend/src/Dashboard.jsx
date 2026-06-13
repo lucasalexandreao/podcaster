@@ -1,8 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchWithAuth } from './api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    const loadProjects = async () => {
+      try {
+        const response = await fetchWithAuth('/api/studio/projects/');
+        const data = await response.json();
+
+        if (!active) return;
+
+        if (response.ok) {
+          setProjects(data);
+        } else {
+          setError('Não foi possível carregar os seus podcasts.');
+        }
+      } catch (err) {
+        if (active) {
+          setError('Erro ao conectar com o servidor.');
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProjects();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
@@ -12,15 +49,7 @@ export default function Dashboard() {
     navigate('/');
   };
 
-  // MOCKS
-  const projects = [
-    { id: 1, title: 'O Futuro da IA na Saúde', duration: '12 min', date: '28 Mai 2026', agents: ['Ana', 'Carlos'] },
-    { id: 2, title: 'Mercado Financeiro Global', duration: '8 min', date: '25 Mai 2026', agents: ['Sofia', 'João'] },
-    { id: 3, title: 'Review: Novos Gadgets', duration: '15 min', date: '20 Mai 2026', agents: ['TechBot', 'Ana'] },
-    { id: 1, title: 'O Futuro da IA na Saúde', duration: '12 min', date: '28 Mai 2026', agents: ['Ana', 'Carlos'] },
-    { id: 2, title: 'Mercado Financeiro Global', duration: '8 min', date: '25 Mai 2026', agents: ['Sofia', 'João'] },
-    { id: 3, title: 'Review: Novos Gadgets', duration: '15 min', date: '20 Mai 2026', agents: ['TechBot', 'Ana'] },
-  ];
+  const formatDate = (value) => new Intl.DateTimeFormat('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value));
 
   return (
     <main className="app dashboard-app">
@@ -47,21 +76,29 @@ export default function Dashboard() {
         </header>
 
         <div className="projects-grid">
-          {projects.length > 0 ? (
+          {loading ? (
+            <div className="empty-state">
+              <p>A carregar podcasts...</p>
+            </div>
+          ) : error ? (
+            <div className="empty-state">
+              <p>{error}</p>
+            </div>
+          ) : projects.length > 0 ? (
             projects.map((project) => (
               <div key={project.id} className="project-card">
                 <div className="project-card-header">
                   <div className="waveform-mini" aria-hidden="true">
                     <i></i><i></i><i></i><i></i>
                   </div>
-                  <span className="project-date">{project.date}</span>
+                  <span className="project-date">{formatDate(project.created_at)}</span>
                 </div>
-                <h3>{project.title}</h3>
+                <h3>{project.topic}</h3>
                 <p className="project-details">
-                  Agentes: {project.agents.join(' & ')} • {project.duration}
+                  Agentes: {project.agents.join(' & ')} • {project.target_duration} min • {project.line_count} falas
                 </p>
                 <div className="project-card-actions">
-                  <button className="play-btn">▶ Ouvir Episódio</button>
+                  <button className="play-btn" onClick={() => navigate(`/podcast/${project.id}`)}>Abrir Roteiro</button>
                 </div>
               </div>
             ))

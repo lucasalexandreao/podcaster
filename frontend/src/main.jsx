@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login';
 import Dashboard from './Dashboard';
 import NewPodcast from './NewPodcast';
+import PodcastResult from './PodcastResult';
 import './style.css';
 
 const PrivateRoute = ({ children }) => {
@@ -28,6 +29,11 @@ createRoot(document.getElementById('root')).render(
         <Route 
           path="/novo-podcast" 
           element={ <PrivateRoute><NewPodcast /></PrivateRoute> } 
+        />
+
+        <Route
+          path="/podcast/:id"
+          element={ <PrivateRoute><PodcastResult /></PrivateRoute> }
         />
       </Routes>
     </BrowserRouter>

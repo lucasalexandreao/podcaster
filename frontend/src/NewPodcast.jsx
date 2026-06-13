@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchWithAuth } from './api';
 
 export default function NewPodcast() {
   const navigate = useNavigate();
@@ -7,6 +8,8 @@ export default function NewPodcast() {
   // Estados para as configurações globais
   const [topic, setTopic] = useState('');
   const [duration, setDuration] = useState(5); // Duração em minutos
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   // Estados para os agentes 
   const [agent1, setAgent1] = useState({ voice: 'Voz A (Feminina Suave)', tone: 'Descontraído', traits: [] });
@@ -29,15 +32,41 @@ export default function NewPodcast() {
     }
   };
 
-  const handleGenerate = (e) => {
+  const handleGenerate = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (!topic.trim()) {
-      alert("Por favor, defina um tema para o podcast.");
+      setError('Por favor, defina um tema para o podcast.');
       return;
     }
-    
-    alert("Gerar áudio clicado! Dados prontos para enviar ao backend.");
-    console.log("Dados do Podcast:", { topic, duration, agent1, agent2 });
+
+    setLoading(true);
+
+    try {
+      const response = await fetchWithAuth('/api/studio/projects/', {
+        method: 'POST',
+        body: JSON.stringify({
+          topic,
+          target_duration: Number(duration),
+          agent1_config: { name: 'Anfitrião', ...agent1 },
+          agent2_config: { name: 'Convidado', ...agent2 },
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.topic?.[0] || data.target_duration?.[0] || 'Não foi possível criar o roteiro. Tente novamente.');
+        return;
+      }
+
+      navigate(`/podcast/${data.id}`);
+    } catch (err) {
+      setError('Erro ao conectar com o servidor. Verifique se o backend está rodando.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -169,8 +198,10 @@ export default function NewPodcast() {
             </div>
           </section>
 
-          <button type="submit" className="generate-btn">
-            Gerar Áudio do Podcast 
+          {error && <p className="form-error">{error}</p>}
+
+          <button type="submit" className="generate-btn" disabled={loading}>
+            {loading ? 'Gerando roteiro...' : 'Gerar Roteiro Mockado'}
           </button>
         </form>
       </div>

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     # App de usuários
     'accounts',
+    'studio',
 ]
 
 MIDDLEWARE = [
