@@ -1,9 +1,42 @@
 from django.db.models import Count
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 
 from .models import PodcastLine, PodcastProject
 from .serializers import PodcastLineSerializer, PodcastProjectListSerializer, PodcastProjectSerializer
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .services import gerar_roteiro_claude
+
+class CriarRoteiroPodcastView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            dados = request.data
+            topico = dados.get('topico')
+            anfitriao = dados.get('anfitriao')
+            convidado = dados.get('convidado')
+
+            if not topico or not anfitriao or not convidado:
+                return Response(
+                    {"erro": "Tópico, anfitrião e convidado são obrigatórios."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            roteiro = gerar_roteiro_claude(topico, anfitriao, convidado)
+
+            return Response({
+                "mensagem": "Roteiro gerado com sucesso!",
+                "roteiro": roteiro
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"erro": f"Ocorreu um erro ao gerar o roteiro: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class PodcastProjectListCreateView(generics.ListCreateAPIView):

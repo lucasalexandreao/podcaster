@@ -1,11 +1,48 @@
 import time
-
+import anthropic
+from django.conf import settings
 from django.db import close_old_connections, transaction
 
 from .models import PodcastLine, PodcastProject
 
 
 LINE_DELAY_SECONDS = 3
+
+def gerar_roteiro(topico, anfitriao_config, convidado_config):
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+
+    system_prompt = f"""
+
+        Seu papel é atuar como um roteirista de podcast, com a tarefa de escrever o roteiro em que dois agentes estarão em uma conversa.
+
+        PERFIL DO ANFITRIÃO (Agente 1):
+        - Tom: {anfitriao_config.get('tom')}
+        - Personalidade: {anfitriao_config.get('personalidade')}
+
+        PERFIL DO CONVIDADO (Agente 2):
+        - Tom: {convidado_config.get('tom')}
+        - Personalidade: {convidado_config.get('personalidade')}
+
+        INSTRUÇÕES DE FORMATAÇÃO:
+        - Escreva o roteiro como um diálogo direto.
+        - Use as tags [Anfitrião] e [Convidado] antes das falas.
+        - Inclua pequenas reações entre parênteses, como (risos), (pausa reflexiva), para ajudar na geração de áudio posterior.
+        - O diálogo deve fluir naturalmente, com interrupções polidas e concordâncias, refletindo estritamente a personalidade de cada um.
+    """
+
+    user_prompt = f"Escreva o roteiro de um episódio de podcast sobre o seguinte tópico: {topico}"
+
+    response = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=2500,
+        temperature=0.7, 
+        system=system_prompt,
+        messages=[
+            {"role": "user", "content": user_prompt}
+        ]
+    )
+
+    return response.content[0].text
 
 
 def build_mock_script(project):
