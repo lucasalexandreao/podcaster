@@ -1,4 +1,5 @@
 from django.db.models import Count
+from .generation import enqueue_audio_generation
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 
@@ -127,3 +128,23 @@ class PodcastLineUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         return PodcastLine.objects.filter(project_id=self.kwargs['project_pk'], project__owner=self.request.user)
+
+
+class GenerateAudioView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk):
+
+        project = PodcastProject.objects.filter(
+            id=pk,
+            owner=request.user
+        ).first()
+
+        if not project:
+            return Response(status=404)
+
+        enqueue_audio_generation(project.id)
+
+        return Response({
+            "message": "Áudio sendo gerado"
+        })
