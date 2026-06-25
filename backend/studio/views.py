@@ -7,7 +7,10 @@ from .serializers import PodcastLineSerializer, PodcastProjectListSerializer, Po
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .services import gerar_roteiro_claude
+from .services import (
+    gerar_roteiro,
+    gerar_metadados
+)
 
 class CriarRoteiroPodcastView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -25,12 +28,20 @@ class CriarRoteiroPodcastView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            roteiro = gerar_roteiro_claude(topico, anfitriao, convidado)
+            roteiro = gerar_roteiro(
+                topico,
+                anfitriao,
+                convidado
+            )
+
+            descricao, tags = gerar_metadados(topico)
 
             return Response({
                 "mensagem": "Roteiro gerado com sucesso!",
-                "roteiro": roteiro
-            }, status=status.HTTP_200_OK)
+                "roteiro": roteiro,
+                "descricao": descricao,
+                "tags": tags
+            })
 
         except Exception as e:
             return Response(

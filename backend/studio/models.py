@@ -7,6 +7,9 @@ class PodcastProject(models.Model):
     STATUS_SCRIPT_READY = 'script_ready'
     STATUS_FAILED = 'failed'
 
+    description = models.TextField(blank=True, default='')
+    tags = models.JSONField(default=list, blank=True)
+    
     STATUS_CHOICES = (
         (STATUS_GENERATING, 'Generating'),
         (STATUS_SCRIPT_READY, 'Script ready'),

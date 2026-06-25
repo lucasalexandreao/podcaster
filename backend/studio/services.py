@@ -88,6 +88,12 @@ def generate_script_lines(project_id, line_delay=LINE_DELAY_SECONDS):
                     },
                 )
 
+        descricao, tags = gerar_metadados(project.topic)
+
+        project.description = descricao
+        project.tags = tags
+        project.save()
+
         PodcastProject.objects.filter(id=project_id, status=PodcastProject.STATUS_GENERATING).update(
             status=PodcastProject.STATUS_SCRIPT_READY,
         )
@@ -96,3 +102,46 @@ def generate_script_lines(project_id, line_delay=LINE_DELAY_SECONDS):
         raise
     finally:
         close_old_connections()
+
+
+def gerar_metadados(topico):
+    client = anthropic.Anthropic(
+        api_key=settings.ANTHROPIC_API_KEY
+    )
+
+    prompt = f"""
+    Tema: {topico}
+
+    Gere:
+
+    1. Uma descrição curta do episódio (máx. 100 palavras)
+
+    2. Cinco tags relacionadas
+
+    Responda apenas em JSON:
+
+    {{
+      "descricao": "...",
+      "tags": ["...", "...", "..."]
+    }}
+    """
+
+    response = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=300,
+        temperature=0.4,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+    import json
+
+    dados = json.loads(
+        response.content[0].text
+    )
+
+    return dados["descricao"], dados["tags"]

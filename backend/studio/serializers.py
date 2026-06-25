@@ -19,15 +19,24 @@ class PodcastProjectSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'topic',
+            'description',
+            'tags',
             'target_duration',
             'status',
-            'agent1_config',
-            'agent2_config',
+            'agents',
+            'line_count',
+            'created_at',
+            'updated_at'
+        )
+        read_only_fields = (
+            'id',
+            'description',
+            'tags',
+            'status',
             'lines',
             'created_at',
             'updated_at',
         )
-        read_only_fields = ('id', 'status', 'lines', 'created_at', 'updated_at')
 
     def validate_topic(self, value):
         if not value.strip():
