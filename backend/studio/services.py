@@ -14,8 +14,11 @@ _SEARCH_TOOLS = [
     {
         "name": "web_search",
         "description": (
-            "Search the web for current information about the podcast topic. "
-            "Use only when fresh facts are genuinely needed — not for every line."
+            "Search the web for up-to-date information about the podcast topic. "
+            "Call this tool before writing the very first line to understand the current state of the topic. "
+            "Also call it whenever a line would benefit from a specific fact, statistic, recent development, "
+            "named person, study, or data point. Prefer grounded dialogue over generic statements — "
+            "if you are about to write a vague claim, search first."
         ),
         "input_schema": {
             "type": "object",
@@ -128,42 +131,48 @@ def generate_script_lines(project_id):
     try:
         project = PodcastProject.objects.get(id=project_id)
 
-        agent1_name = project.agent1_config.get('name') or 'Anfitrião'
-        agent2_name = project.agent2_config.get('name') or 'Convidado'
-        agent1_tone = project.agent1_config.get('tone') or 'Neutro'
-        agent2_tone = project.agent2_config.get('tone') or 'Neutro'
-        agent1_traits = ', '.join(project.agent1_config.get('traits') or ['curioso'])
-        agent2_traits = ', '.join(project.agent2_config.get('traits') or ['analítico'])
-
-        system_prompt = f"""
-            Seu papel é atuar como um roteirista de podcast, com a tarefa de escrever o roteiro em que dois agentes estarão em uma conversa.
-
-            PERFIL DO ANFITRIÃO (Agente 1) - {agent1_name}:
-            - Tom: {agent1_tone}
-            - Personalidade: {agent1_traits}
-
-            PERFIL DO CONVIDADO (Agente 2) - {agent2_name}:
-            - Tom: {agent2_tone}
-            - Personalidade: {agent2_traits}
-
-            INSTRUÇÕES DE FORMATAÇÃO:
-            - Gere o roteiro fala por fala, uma de cada vez.
-            - Responda apenas com o texto da fala do personagem solicitado, sem prefixos como [Anfitrião] ou [Convidado].
-            - Inclua pequenas reações entre parênteses, como (risos), (pausa reflexiva), quando apropriado.
-            - O diálogo deve fluir naturalmente, refletindo estritamente a personalidade de cada um.
-        """
-
         agents = [
-            ('agent1', agent1_name, 'Anfitrião'),
-            ('agent2', agent2_name, 'Convidado'),
+            ('agent1', project.agent1_config.get('name') or 'Anfitrião', 'Anfitrião',
+             project.agent1_config.get('tone') or 'Neutro',
+             ', '.join(project.agent1_config.get('traits') or ['curioso'])),
+            ('agent2', project.agent2_config.get('name') or 'Convidado', 'Convidado',
+             project.agent2_config.get('tone') or 'Neutro',
+             ', '.join(project.agent2_config.get('traits') or ['analítico'])),
         ]
+        other = {0: 1, 1: 0}
 
         num_lines = max(6, project.target_duration * 2)
         client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
         conversation_history = []
 
         for order in range(1, num_lines + 1):
-            speaker_key, speaker_name, speaker_role = agents[(order - 1) % 2]
+            idx = (order - 1) % 2
+            speaker_key, speaker_name, speaker_role, speaker_tone, speaker_traits = agents[idx]
+            _, other_name, other_role, _, _ = agents[other[idx]]
+
+            system_prompt = f"""
+                Você é {speaker_name}, o {speaker_role} de um podcast ao vivo sobre o seguinte tema:
+
+                TEMA: {project.topic}
+
+                QUEM VOCÊ É:
+                - Tom de voz: {speaker_tone}
+                - Traços de personalidade: {speaker_traits}
+
+                Fale sempre na primeira pessoa como {speaker_name}. Não saia do personagem.
+                Cada resposta sua deve avançar a discussão do tema acima — não desvie.
+
+                USO DA PESQUISA WEB:
+                - Use a ferramenta de pesquisa antes da sua primeira fala para entender o estado atual do tema.
+                - Use-a também sempre que for mencionar um dado, estatística, estudo, evento recente ou pessoa real.
+                - Prefira afirmações concretas e verificadas a generalidades vagas.
+
+                FORMATAÇÃO:
+                - Comece a resposta IMEDIATAMENTE com a sua fala — nenhuma palavra antes disso.
+                - Proibido qualquer preâmbulo: não escreva "Claro,", "Aqui está", nem confirmações.
+                - Inclua reações naturais entre parênteses, como (risos) ou (pausa), quando enriquecerem o ritmo.
+                - Entre 2 e 5 frases. Seja direto e natural.
+            """
 
             # Drain pending director notes before building this turn's prompt
             pending_qs = DirectorMessage.objects.filter(project_id=project_id, consumed=False)
@@ -172,15 +181,25 @@ def generate_script_lines(project_id):
                 pending_qs.update(consumed=True)
 
             if order == 1:
-                user_msg = f"Inicie o episódio de podcast sobre '{project.topic}'. Escreva a fala de abertura de {speaker_name} ({speaker_role})."
+                user_msg = (
+                    f"O episódio começa agora. Pesquise o tema '{project.topic}' antes de falar. "
+                    f"Abra o episódio apresentando o tema com contexto atual. ({order}/{num_lines})"
+                )
             elif order == num_lines:
-                user_msg = f"Esta é a última fala do episódio. Escreva o encerramento por {speaker_name} ({speaker_role})."
+                user_msg = (
+                    f"Última fala do episódio ({order}/{num_lines}). "
+                    f"Encerre a conversa retomando o tema '{project.topic}' e deixe uma reflexão final."
+                )
             else:
-                user_msg = f"Continue o diálogo. Escreva a próxima fala de {speaker_name} ({speaker_role})."
+                user_msg = (
+                    f"({order}/{num_lines}) É a sua vez, {speaker_name}. "
+                    f"Responda a {other_name} e avance a discussão sobre '{project.topic}'. "
+                    f"Se for citar um dado ou fato específico, pesquise antes."
+                )
 
             if pending:
                 notes = " | ".join(m.text for m in pending)
-                user_msg += f"\n\n[NOTA DO DIRETOR — orienta apenas, não aparece no roteiro]: {notes}"
+                user_msg += f"\n\n[NOTA DO DIRETOR — orienta apenas, não aparece na sua fala]: {notes}"
 
             conversation_history.append({"role": "user", "content": user_msg})
 
