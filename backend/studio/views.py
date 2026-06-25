@@ -2,15 +2,12 @@ from django.db.models import Count
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 
-from .models import PodcastLine, PodcastProject
+from .models import DirectorMessage, PodcastLine, PodcastProject
 from .serializers import PodcastLineSerializer, PodcastProjectListSerializer, PodcastProjectSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .services import (
-    gerar_roteiro,
-    gerar_metadados
-)
+from .services import gerar_metadados, VALID_DELAYS
 
 class CriarRoteiroPodcastView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -71,6 +68,42 @@ class PodcastProjectDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         return PodcastProject.objects.filter(owner=self.request.user).prefetch_related('lines')
+
+
+class GenerationSpeedView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def patch(self, request, pk):
+        project = PodcastProject.objects.filter(
+            id=pk, owner=request.user, status=PodcastProject.STATUS_GENERATING
+        ).first()
+        if not project:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        delay = request.data.get('delay')
+        if delay not in VALID_DELAYS:
+            return Response(
+                {'error': f'delay deve ser um de: {sorted(VALID_DELAYS)}'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        project.line_delay = delay
+        project.save(update_fields=['line_delay'])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DirectorMessageView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk):
+        project = PodcastProject.objects.filter(
+            id=pk, owner=request.user, status=PodcastProject.STATUS_GENERATING
+        ).first()
+        if not project:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        text = request.data.get('text', '').strip()
+        if not text:
+            return Response({'error': 'text é obrigatório.'}, status=status.HTTP_400_BAD_REQUEST)
+        DirectorMessage.objects.create(project=project, text=text)
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class FinalizeProjectView(APIView):

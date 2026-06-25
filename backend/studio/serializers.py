@@ -7,8 +7,8 @@ from .models import PodcastLine, PodcastProject
 class PodcastLineSerializer(serializers.ModelSerializer):
     class Meta:
         model = PodcastLine
-        fields = ('id', 'speaker_key', 'speaker_name', 'speaker_role', 'order', 'text', 'created_at', 'updated_at')
-        read_only_fields = ('id', 'speaker_key', 'speaker_name', 'speaker_role', 'order', 'created_at', 'updated_at')
+        fields = ('id', 'speaker_key', 'speaker_name', 'speaker_role', 'order', 'text', 'used_web_search', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'speaker_key', 'speaker_name', 'speaker_role', 'order', 'used_web_search', 'created_at', 'updated_at')
 
 
 class PodcastProjectSerializer(serializers.ModelSerializer):
@@ -23,6 +23,7 @@ class PodcastProjectSerializer(serializers.ModelSerializer):
             'description',
             'tags',
             'target_duration',
+            'line_delay',
             'status',
             'agents',
             'lines',

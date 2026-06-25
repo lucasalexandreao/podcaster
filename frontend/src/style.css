@@ -717,6 +717,43 @@ p {
   font-size: 0.9rem;
 }
 
+.live-generation-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.2rem;
+}
+
+.speed-picker {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.speed-btn {
+  border: 1px solid rgba(255, 248, 238, 0.18);
+  border-radius: 999px;
+  background: transparent;
+  padding: 0.35rem 0.85rem;
+  color: rgba(255, 248, 238, 0.6);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 160ms ease;
+}
+
+.speed-btn:hover {
+  border-color: rgba(255, 248, 238, 0.4);
+  color: #fff8ee;
+}
+
+.speed-btn--active {
+  border-color: #00d2ff;
+  background: rgba(0, 210, 255, 0.12);
+  color: #87e8ff;
+}
+
 .live-generation i {
   width: 0.65rem;
   height: 0.65rem;
@@ -782,6 +819,18 @@ p {
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.web-search-badge {
+  border: 1px solid rgba(0, 210, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(0, 210, 255, 0.1);
+  padding: 0.15rem 0.55rem;
+  color: #87e8ff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -852,4 +901,111 @@ p {
   .chat-line textarea {
     font-size: 0.98rem;
   }
+}
+
+/* =========================================
+   CABINE DO DIRETOR
+   ========================================= */
+
+.director-panel {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+  border: 1px solid rgba(111, 89, 255, 0.3);
+  border-radius: 1.5rem;
+  background: linear-gradient(145deg, rgba(111, 89, 255, 0.1), rgba(0, 210, 255, 0.05));
+  padding: 1.25rem;
+  backdrop-filter: blur(18px);
+}
+
+.director-log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 10rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(111, 89, 255, 0.3) transparent;
+}
+
+.director-empty {
+  color: rgba(255, 248, 238, 0.45);
+  font-size: 0.88rem;
+  font-style: italic;
+}
+
+.director-message {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid rgba(111, 89, 255, 0.25);
+  border-radius: 0.75rem;
+  background: rgba(111, 89, 255, 0.12);
+  padding: 0.5rem 0.75rem;
+}
+
+.director-message__text {
+  color: #d4caff;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.director-message__time {
+  flex-shrink: 0;
+  color: rgba(255, 248, 238, 0.38);
+  font-size: 0.76rem;
+}
+
+.director-form {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-end;
+}
+
+.director-input {
+  flex: 1;
+  border: 1px solid rgba(111, 89, 255, 0.35);
+  border-radius: 1rem;
+  background: rgba(19, 15, 34, 0.65);
+  padding: 0.75rem 1rem;
+  color: #fff8ee;
+  font: inherit;
+  font-size: 0.92rem;
+  outline: none;
+  resize: none;
+  transition: border-color 160ms ease;
+}
+
+.director-input::placeholder {
+  color: rgba(255, 248, 238, 0.35);
+}
+
+.director-input:focus {
+  border-color: rgba(111, 89, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(111, 89, 255, 0.1);
+}
+
+.director-send-btn {
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #6f59ff, #00d2ff);
+  padding: 0.75rem 1.25rem;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+.director-send-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.director-send-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }

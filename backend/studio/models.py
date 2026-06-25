@@ -19,6 +19,7 @@ class PodcastProject(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='podcast_projects')
     topic = models.TextField()
     target_duration = models.PositiveIntegerField(default=5)
+    line_delay = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=32, choices=STATUS_CHOICES, default=STATUS_GENERATING)
     agent1_config = models.JSONField(default=dict)
     agent2_config = models.JSONField(default=dict)
@@ -32,6 +33,19 @@ class PodcastProject(models.Model):
         return self.topic[:80]
 
 
+class DirectorMessage(models.Model):
+    project = models.ForeignKey(PodcastProject, on_delete=models.CASCADE, related_name='director_messages')
+    text = models.TextField()
+    consumed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'[Director → {self.project_id}] {self.text[:60]}'
+
+
 class PodcastLine(models.Model):
     project = models.ForeignKey(PodcastProject, on_delete=models.CASCADE, related_name='lines')
     speaker_key = models.CharField(max_length=16)
@@ -39,6 +53,7 @@ class PodcastLine(models.Model):
     speaker_role = models.CharField(max_length=80)
     order = models.PositiveIntegerField()
     text = models.TextField()
+    used_web_search = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

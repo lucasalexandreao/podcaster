@@ -7,9 +7,16 @@ export default function NewPodcast() {
   
   // Estados para as configurações globais
   const [topic, setTopic] = useState('');
-  const [duration, setDuration] = useState(5); // Duração em minutos
+  const [duration, setDuration] = useState(5);
+  const [lineDelay, setLineDelay] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const SPEEDS = [
+    { label: 'Rápido', delay: 0 },
+    { label: 'Médio', delay: 5 },
+    { label: 'Lento', delay: 10 },
+  ];
 
   // Estados para os agentes 
   const [agent1, setAgent1] = useState({ voice: 'Voz A (Feminina Suave)', tone: 'Descontraído', traits: [] });
@@ -49,6 +56,7 @@ export default function NewPodcast() {
         body: JSON.stringify({
           topic,
           target_duration: Number(duration),
+          line_delay: lineDelay,
           agent1_config: { name: 'Anfitrião', ...agent1 },
           agent2_config: { name: 'Convidado', ...agent2 },
         }),
@@ -102,14 +110,30 @@ export default function NewPodcast() {
             
             <label className="config-label">
               <span>Duração Alvo: {duration} minutos</span>
-              <input 
-                type="range" 
-                min="2" max="15" 
-                value={duration} 
-                onChange={(e) => setDuration(e.target.value)} 
+              <input
+                type="range"
+                min="2" max="15"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
                 className="duration-slider"
               />
             </label>
+
+            <div className="config-label">
+              <span>Velocidade de Geração</span>
+              <div className="speed-picker">
+                {SPEEDS.map(({ label, delay }) => (
+                  <button
+                    key={delay}
+                    type="button"
+                    className={`speed-btn${lineDelay === delay ? ' speed-btn--active' : ''}`}
+                    onClick={() => setLineDelay(delay)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </section>
 
           {/* SECÇÃO DOS AGENTES */}
