@@ -13,6 +13,7 @@ class PodcastLineSerializer(serializers.ModelSerializer):
 
 class PodcastProjectSerializer(serializers.ModelSerializer):
     lines = PodcastLineSerializer(many=True, read_only=True)
+    agents = serializers.SerializerMethodField()
 
     class Meta:
         model = PodcastProject
@@ -24,7 +25,7 @@ class PodcastProjectSerializer(serializers.ModelSerializer):
             'target_duration',
             'status',
             'agents',
-            'line_count',
+            'lines',
             'created_at',
             'updated_at'
         )
@@ -37,6 +38,12 @@ class PodcastProjectSerializer(serializers.ModelSerializer):
             'created_at',
             'updated_at',
         )
+
+    def get_agents(self, obj):
+        return [
+            obj.agent1_config.get('name') or 'Anfitrião',
+            obj.agent2_config.get('name') or 'Convidado',
+        ]
 
     def validate_topic(self, value):
         if not value.strip():

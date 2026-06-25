@@ -1,12 +1,12 @@
-import time
+import json
+import re
+
 import anthropic
 from django.conf import settings
 from django.db import close_old_connections, transaction
 
 from .models import PodcastLine, PodcastProject
 
-
-LINE_DELAY_SECONDS = 3
 
 def gerar_roteiro(topico, anfitriao_config, convidado_config):
     client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
@@ -45,34 +45,69 @@ def gerar_roteiro(topico, anfitriao_config, convidado_config):
     return response.content[0].text
 
 
-def build_mock_script(project):
-    agent1_name = project.agent1_config.get('name') or 'Anfitrião'
-    agent2_name = project.agent2_config.get('name') or 'Convidado'
-    agent1_tone = project.agent1_config.get('tone') or 'Neutro'
-    agent2_tone = project.agent2_config.get('tone') or 'Neutro'
-    agent1_traits = ', '.join(project.agent1_config.get('traits') or ['curioso'])
-    agent2_traits = ', '.join(project.agent2_config.get('traits') or ['analítico'])
-    topic = project.topic
-
-    return [
-        ('agent1', agent1_name, 'Anfitrião', f'Bem-vindos ao nosso estúdio. Hoje vamos explorar: {topic}. Vou conduzir a conversa com um tom {agent1_tone.lower()} e manter o fio narrativo claro.'),
-        ('agent2', agent2_name, 'Convidado', f'Perfeito. A minha leitura inicial é que {topic} merece exemplos concretos, contrapontos e uma explicação acessível. Vou trazer uma abordagem {agent2_tone.lower()}.'),
-        ('agent1', agent1_name, 'Anfitrião', f'Para começar, vamos separar o tema em três partes: contexto, impacto prático e próximos passos. Os meus traços principais aqui são {agent1_traits}.'),
-        ('agent2', agent2_name, 'Convidado', f'E eu vou desafiar algumas ideias para deixar o episódio mais vivo. Com traços como {agent2_traits}, a conversa deve soar natural e útil.'),
-        ('agent1', agent1_name, 'Anfitrião', f'O ponto central é transformar {topic} numa história que o ouvinte consiga acompanhar do primeiro minuto até ao encerramento.'),
-        ('agent2', agent2_name, 'Convidado', 'Concordo. Este é apenas um roteiro mockado, mas já deixa a estrutura pronta para revisão, edição e futura geração de áudio.'),
-    ]
-
-
-def generate_script_lines(project_id, line_delay=LINE_DELAY_SECONDS):
+def generate_script_lines(project_id):
     close_old_connections()
 
     try:
         project = PodcastProject.objects.get(id=project_id)
-        script = build_mock_script(project)
 
-        for order, (speaker_key, speaker_name, speaker_role, text) in enumerate(script, start=1):
-            time.sleep(line_delay)
+        agent1_name = project.agent1_config.get('name') or 'Anfitrião'
+        agent2_name = project.agent2_config.get('name') or 'Convidado'
+        agent1_tone = project.agent1_config.get('tone') or 'Neutro'
+        agent2_tone = project.agent2_config.get('tone') or 'Neutro'
+        agent1_traits = ', '.join(project.agent1_config.get('traits') or ['curioso'])
+        agent2_traits = ', '.join(project.agent2_config.get('traits') or ['analítico'])
+
+        system_prompt = f"""
+            Seu papel é atuar como um roteirista de podcast, com a tarefa de escrever o roteiro em que dois agentes estarão em uma conversa.
+
+            PERFIL DO ANFITRIÃO (Agente 1) - {agent1_name}:
+            - Tom: {agent1_tone}
+            - Personalidade: {agent1_traits}
+
+            PERFIL DO CONVIDADO (Agente 2) - {agent2_name}:
+            - Tom: {agent2_tone}
+            - Personalidade: {agent2_traits}
+
+            INSTRUÇÕES DE FORMATAÇÃO:
+            - Gere o roteiro fala por fala, uma de cada vez.
+            - Responda apenas com o texto da fala do personagem solicitado, sem prefixos como [Anfitrião] ou [Convidado].
+            - Inclua pequenas reações entre parênteses, como (risos), (pausa reflexiva), quando apropriado.
+            - O diálogo deve fluir naturalmente, refletindo estritamente a personalidade de cada um.
+        """
+
+        agents = [
+            ('agent1', agent1_name, 'Anfitrião'),
+            ('agent2', agent2_name, 'Convidado'),
+        ]
+
+        num_lines = max(6, project.target_duration * 2)
+        client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+        conversation_history = []
+
+        for order in range(1, num_lines + 1):
+            speaker_key, speaker_name, speaker_role = agents[(order - 1) % 2]
+
+            if order == 1:
+                user_msg = f"Inicie o episódio de podcast sobre '{project.topic}'. Escreva a fala de abertura de {speaker_name} ({speaker_role})."
+            elif order == num_lines:
+                user_msg = f"Esta é a última fala do episódio. Escreva o encerramento por {speaker_name} ({speaker_role})."
+            else:
+                user_msg = f"Continue o diálogo. Escreva a próxima fala de {speaker_name} ({speaker_role})."
+
+            conversation_history.append({"role": "user", "content": user_msg})
+
+            response = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=400,
+                temperature=0.7,
+                system=system_prompt,
+                messages=conversation_history,
+            )
+
+            text = response.content[0].text.strip()
+            conversation_history.append({"role": "assistant", "content": text})
+
             with transaction.atomic():
                 project = PodcastProject.objects.select_for_update().get(id=project_id)
                 if project.status != PodcastProject.STATUS_GENERATING:
@@ -98,7 +133,13 @@ def generate_script_lines(project_id, line_delay=LINE_DELAY_SECONDS):
             status=PodcastProject.STATUS_SCRIPT_READY,
         )
     except Exception:
-        PodcastProject.objects.filter(id=project_id).update(status=PodcastProject.STATUS_FAILED)
+        has_lines = PodcastLine.objects.filter(project_id=project_id).exists()
+        if has_lines:
+            PodcastProject.objects.filter(
+                id=project_id, status=PodcastProject.STATUS_GENERATING
+            ).update(status=PodcastProject.STATUS_SCRIPT_READY)
+        else:
+            PodcastProject.objects.filter(id=project_id).update(status=PodcastProject.STATUS_FAILED)
         raise
     finally:
         close_old_connections()
@@ -138,10 +179,10 @@ def gerar_metadados(topico):
         ]
     )
 
-    import json
-
-    dados = json.loads(
-        response.content[0].text
-    )
+    text = response.content[0].text
+    match = re.search(r'\{.*\}', text, re.DOTALL)
+    if not match:
+        raise ValueError(f'Resposta da API não contém JSON válido: {text!r}')
+    dados = json.loads(match.group())
 
     return dados["descricao"], dados["tags"]

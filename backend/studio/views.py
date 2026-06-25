@@ -73,6 +73,20 @@ class PodcastProjectDetailView(generics.RetrieveAPIView):
         return PodcastProject.objects.filter(owner=self.request.user).prefetch_related('lines')
 
 
+class FinalizeProjectView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk):
+        updated = PodcastProject.objects.filter(
+            id=pk,
+            owner=request.user,
+            status=PodcastProject.STATUS_GENERATING,
+        ).update(status=PodcastProject.STATUS_SCRIPT_READY)
+        if not updated:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class PodcastLineUpdateView(generics.UpdateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PodcastLineSerializer
