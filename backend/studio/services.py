@@ -88,43 +88,6 @@ def _call_with_tools(client, system_prompt, messages):
     ), used_search
 
 
-# def gerar_roteiro(topico, anfitriao_config, convidado_config):
-#     client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-
-#     system_prompt = f"""
-
-#         Seu papel é atuar como um roteirista de podcast, com a tarefa de escrever o roteiro em que dois agentes estarão em uma conversa.
-
-#         PERFIL DO ANFITRIÃO (Agente 1):
-#         - Tom: {anfitriao_config.get('tom')}
-#         - Personalidade: {anfitriao_config.get('personalidade')}
-
-#         PERFIL DO CONVIDADO (Agente 2):
-#         - Tom: {convidado_config.get('tom')}
-#         - Personalidade: {convidado_config.get('personalidade')}
-
-#         INSTRUÇÕES DE FORMATAÇÃO:
-#         - Escreva o roteiro como um diálogo direto.
-#         - Use as tags [Anfitrião] e [Convidado] antes das falas.
-#         - Inclua pequenas reações entre parênteses, como (risos), (pausa reflexiva), para ajudar na geração de áudio posterior.
-#         - O diálogo deve fluir naturalmente, com interrupções polidas e concordâncias, refletindo estritamente a personalidade de cada um.
-#     """
-
-#     user_prompt = f"Escreva o roteiro de um episódio de podcast sobre o seguinte tópico: {topico}"
-
-#     response = client.messages.create(
-#         model="claude-haiku-4-5-20251001",
-#         max_tokens=2500,
-#         temperature=0.7, 
-#         system=system_prompt,
-#         messages=[
-#             {"role": "user", "content": user_prompt}
-#         ]
-#     )
-
-#     return response.content[0].text
-
-
 def generate_script_lines(project_id):
     close_old_connections()
 
@@ -141,7 +104,10 @@ def generate_script_lines(project_id):
         ]
         other = {0: 1, 1: 0}
 
-        num_lines = max(6, project.target_duration * 2)
+        base_duration = project.target_duration * 2
+        odd_duration = base_duration if base_duration % 2 != 0 else base_duration + 1
+
+        num_lines = max(7, odd_duration)
         client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
         conversation_history = []
 
