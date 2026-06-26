@@ -34,9 +34,9 @@ O foco principal é a personalização total: o usuário não apenas escolhe o a
 
 - [x] Definição do escopo e regras de negócio.
 - [x] Geração de mockups e protótipos de alta fidelidade no Figma.
-- [ ] Setup inicial do repositório front-end e back-end.
-- [ ] Integração com APIs de LLM (Large Language Models) para criação de roteiro.
-- [ ] Integração com APIs de TTS (Text-to-Speech) para geração de áudio.
-- [ ] Desenvolvimento do Player de áudio interativo.
-- [ ] Lançamento do MVP (Minimum Viable Product).
+- [x] Setup inicial do repositório front-end e back-end.
+- [x] Integração com APIs de LLM (Large Language Models) para criação de roteiro.
+- [x] Integração com APIs de TTS (Text-to-Speech) para geração de áudio.
+- [x] Desenvolvimento do Player de áudio interativo.
+- [x] Lançamento do MVP (Minimum Viable Product).
 
