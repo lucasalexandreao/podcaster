@@ -230,7 +230,7 @@ export default function NewPodcast() {
           {error && <p className="form-error">{error}</p>}
 
           <button type="submit" className="generate-btn" disabled={loading}>
-            {loading ? 'Gerando roteiro...' : 'Gerar Roteiro Mockado'}
+            {loading ? 'Gerando roteiro...' : 'Gerar Roteiro'}
           </button>
         </form>
       </div>
