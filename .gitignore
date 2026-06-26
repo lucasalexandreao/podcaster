@@ -19,6 +19,9 @@ __pycache__/
 
 db.sqlite3
 
+# Áudios gerados
+media/
+
 .env
 
 # =========================

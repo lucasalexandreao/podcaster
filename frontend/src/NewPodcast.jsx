@@ -19,10 +19,15 @@ export default function NewPodcast() {
   ];
 
   // Estados para os agentes 
-  const [agent1, setAgent1] = useState({ voice: 'Voz A (Feminina Suave)', tone: 'Descontraído', traits: [] });
-  const [agent2, setAgent2] = useState({ voice: 'Voz C (Masculino Grave)', tone: 'Provocativo', traits: [] });
+  const [agent1, setAgent1] = useState({ voice: 'voz_a', tone: 'Descontraído', traits: [] });
+  const [agent2, setAgent2] = useState({ voice: 'voz_c', tone: 'Provocativo', traits: [] });
 
-  const availableVoices = ['Voz A (Feminina Suave)', 'Voz B (Feminina Dinâmica)', 'Voz C (Masculino Grave)', 'Voz D (Masculino Jovem)'];
+  const availableVoices = [
+    { key: 'voz_a', label: 'Sarah — Madura, Reconfortante, Confiante' },
+    { key: 'voz_b', label: 'Alice — Clara, Educadora Envolvente' },
+    { key: 'voz_c', label: 'George — Caloroso, Contador de Histórias' },
+    { key: 'voz_d', label: 'Roger — Descontraído, Casual, Ressonante' },
+  ];
   const availableTones = ['Neutro', 'Descontraído', 'Formal', 'Provocativo', 'Empático', 'Didático', 'Melancólico'];
   const availableTraits = ['Sarcástico', 'Profissional', 'Entusiasta', 'Casual', 'Sincero', 'Humorístico', 'Cético'];
 
@@ -152,7 +157,7 @@ export default function NewPodcast() {
                   <label className="config-label" style={{ marginBottom: 0 }}>
                     <span>Voz</span>
                     <select value={agent1.voice} onChange={(e) => setAgent1({...agent1, voice: e.target.value})}>
-                      {availableVoices.map(v => <option key={v} value={v}>{v}</option>)}
+                      {availableVoices.map(v => <option key={v.key} value={v.key}>{v.label}</option>)}
                     </select>
                   </label>
 
@@ -191,7 +196,7 @@ export default function NewPodcast() {
                   <label className="config-label" style={{ marginBottom: 0 }}>
                     <span>Voz</span>
                     <select value={agent2.voice} onChange={(e) => setAgent2({...agent2, voice: e.target.value})}>
-                      {availableVoices.map(v => <option key={v} value={v}>{v}</option>)}
+                      {availableVoices.map(v => <option key={v.key} value={v.key}>{v.label}</option>)}
                     </select>
                   </label>
 
