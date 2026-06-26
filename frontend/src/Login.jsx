@@ -126,7 +126,7 @@ export default function Login() {
       <section className="hero">
         <div className="hero-content">
           <p className="eyebrow">{isLoginView ? 'Bem-vindo de volta' : 'Comece agora'}</p>
-          <h1>{isLoginView ? 'Entre para continuar sua producao de podcasts.' : 'Crie seu estúdio de IA e dirija conversas.'}</h1>
+          <h1>{isLoginView ? 'Entre para continuar sua produção de podcasts.' : 'Crie seu estúdio de IA e dirija conversas.'}</h1>
           <p className="intro">
             Acesse seu estúdio, acompanhe roteiros, ajuste vozes e siga do
             planejamento à gravação em uma única interface.
