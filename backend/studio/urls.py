@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import CriarRoteiroPodcastView, DirectorMessageView, FinalizeProjectView, GenerationSpeedView, PodcastLineUpdateView, PodcastProjectDetailView, PodcastProjectListCreateView
+from .views import CriarRoteiroPodcastView, DirectorMessageView, FinalizeProjectView, GenerateAudioView, GenerationSpeedView, PodcastLineUpdateView, PodcastProjectDetailView, PodcastProjectListCreateView
 
 urlpatterns = [
     path('projects/', PodcastProjectListCreateView.as_view(), name='studio_projects'),
@@ -10,4 +10,9 @@ urlpatterns = [
     path('projects/<int:pk>/finalize/', FinalizeProjectView.as_view(), name='studio_project_finalize'),
     path('projects/<int:project_pk>/lines/<int:pk>/', PodcastLineUpdateView.as_view(), name='studio_line_update'),
     path('api/gerar-roteiro/', CriarRoteiroPodcastView.as_view(), name='gerar_roteiro'),
+    path(
+    'projects/<int:pk>/generate-audio/',
+    GenerateAudioView.as_view(),
+    name='generate_audio'
+),
 ]

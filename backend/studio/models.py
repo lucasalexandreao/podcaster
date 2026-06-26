@@ -15,6 +15,17 @@ class PodcastProject(models.Model):
         (STATUS_SCRIPT_READY, 'Script ready'),
         (STATUS_FAILED, 'Failed'),
     )
+    
+    audio_file = models.FileField(
+        upload_to='podcasts/',
+        null=True,
+        blank=True
+    )
+
+    audio_status = models.CharField(
+        max_length=20,
+        default='pending'
+    )
 
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='podcast_projects')
     topic = models.TextField()

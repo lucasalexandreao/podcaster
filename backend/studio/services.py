@@ -104,10 +104,10 @@ def generate_script_lines(project_id):
         ]
         other = {0: 1, 1: 0}
 
-        base_duration = project.target_duration * 2
+        base_duration = int(project.target_duration * 1.5)
         odd_duration = base_duration if base_duration % 2 != 0 else base_duration + 1
 
-        num_lines = max(7, odd_duration)
+        num_lines = max(5, odd_duration)
         client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
         conversation_history = []
 
@@ -136,7 +136,7 @@ def generate_script_lines(project_id):
                 FORMATAÇÃO:
                 - Comece a resposta IMEDIATAMENTE com a sua fala — nenhuma palavra antes disso.
                 - Proibido qualquer preâmbulo: não escreva "Claro,", "Aqui está", nem confirmações.
-                - Inclua reações naturais entre parênteses, como (risos) ou (pausa), quando enriquecerem o ritmo.
+                - Proibido usar parênteses ou qualquer descrição de ação/emoção como (risos), (pausa), (pensativo), etc.
                 - Entre 2 e 5 frases. Seja direto e natural.
             """
 

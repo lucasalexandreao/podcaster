@@ -25,6 +25,8 @@ class PodcastProjectSerializer(serializers.ModelSerializer):
             'target_duration',
             'line_delay',
             'status',
+            'audio_status',
+            'audio_file',
             'agents',
             'lines',
             'created_at',

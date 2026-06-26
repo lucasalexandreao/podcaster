@@ -15,6 +15,9 @@ export default function PodcastResult() {
   const [directorSending, setDirectorSending] = useState(false);
   const directorEndRef = useRef(null);
   const [speed, setSpeed] = useState(0);
+  const pollFailures = useRef(0);
+  const MAX_POLL_FAILURES = 4;
+  const [audioError, setAudioError] = useState('');
 
   const SPEEDS = [
     { label: 'Rápido', delay: 0 },
@@ -42,6 +45,8 @@ export default function PodcastResult() {
         if (!active) return;
 
         if (response.ok) {
+          pollFailures.current = 0;
+          setError('');
           setProject(data);
           setSpeed((prev) => (prev === data.line_delay ? prev : data.line_delay));
           setDrafts((current) => {
@@ -54,15 +59,21 @@ export default function PodcastResult() {
             return next;
           });
 
-          if (data.status !== 'generating' && intervalId) {
-            clearInterval(intervalId);
-          }
         } else {
-          setError('Não foi possível carregar este roteiro.');
+          pollFailures.current += 1;
+          if (pollFailures.current >= MAX_POLL_FAILURES) {
+            clearInterval(intervalId);
+            setError('Sem ligação ao servidor. Recarregue a página para continuar.');
+          }
         }
-      } catch (err) {
-        if (active) {
-          setError('Erro ao conectar com o servidor.');
+      } catch {
+        if (!active) return;
+        pollFailures.current += 1;
+        if (pollFailures.current >= MAX_POLL_FAILURES) {
+          clearInterval(intervalId);
+          setError('Sem ligação ao servidor. Recarregue a página para continuar.');
+        } else {
+          setError('Erro de ligação. A tentar novamente…');
         }
       } finally {
         if (active) {
@@ -97,6 +108,20 @@ export default function PodcastResult() {
       }
     } finally {
       setDirectorSending(false);
+    }
+  };
+
+  const handleGenerateAudio = async () => {
+    setAudioError('');
+    try {
+      const response = await fetchWithAuth(`/api/studio/projects/${id}/generate-audio/`, { method: 'POST' });
+      if (response.ok) {
+        setProject((p) => ({ ...p, audio_status: 'generating' }));
+      } else {
+        setAudioError('Não foi possível iniciar a geração de áudio.');
+      }
+    } catch {
+      setAudioError('Erro ao conectar com o servidor.');
     }
   };
 
@@ -205,7 +230,16 @@ export default function PodcastResult() {
           )}
         </header>
 
-        {error && <p className="form-error">{error}</p>}
+        {error && (
+          <div className="poll-error">
+            <p className="form-error">{error}</p>
+            {pollFailures.current >= MAX_POLL_FAILURES && (
+              <button className="poll-error__reload" onClick={() => window.location.reload()}>
+                Recarregar
+              </button>
+            )}
+          </div>
+        )}
         {isFailed && <p className="form-error">A geração foi interrompida. Pode voltar ao dashboard e tentar criar outro roteiro.</p>}
 
         {isGenerating && (
@@ -287,6 +321,40 @@ export default function PodcastResult() {
             );
           })}
         </div>
+
+        {!isGenerating && !isFailed && (
+          <section className="audio-section">
+            <p className="eyebrow audio-section__title">Áudio do Episódio</p>
+            {audioError && <p className="form-error">{audioError}</p>}
+            {project.audio_status === 'pending' && (
+              <button className="audio-generate-btn" onClick={handleGenerateAudio}>
+                Gerar Áudio do Episódio
+              </button>
+            )}
+            {project.audio_status === 'generating' && (
+              <div className="live-generation">
+                <i></i>
+                <p>Sintetizando falas… isso pode levar alguns minutos.</p>
+              </div>
+            )}
+            {project.audio_status === 'ready' && (
+              <div className="audio-ready">
+                <audio className="audio-player" controls src={project.audio_file} />
+                <a className="audio-download-btn" href={project.audio_file} download>
+                  Baixar Episódio
+                </a>
+              </div>
+            )}
+            {project.audio_status === 'failed' && (
+              <>
+                <p className="form-error">A síntese de áudio falhou. Verifique as configurações e tente novamente.</p>
+                <button className="audio-generate-btn" onClick={handleGenerateAudio}>
+                  Tentar Novamente
+                </button>
+              </>
+            )}
+          </section>
+        )}
       </section>
     </main>
   );
